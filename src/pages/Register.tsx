@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { BookOpen, Loader2, ArrowLeft } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { z } from 'zod';
 
@@ -100,11 +100,13 @@ const Register = () => {
             <LanguageToggle />
           </div>
           
-          <div className="flex items-center gap-2 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <BookOpen className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="font-display text-xl font-bold text-foreground">Onboard</span>
+          <div className="flex items-center gap-3 mb-8">
+            <img
+              src="/singelportalen-logo.svg"
+              alt="Singelportalen logo"
+              className="h-10 w-auto"
+            />
+            <span className="font-display text-xl font-bold text-foreground">Onboarding</span>
           </div>
 
           <h1 className="font-display text-3xl font-bold text-foreground mb-2">

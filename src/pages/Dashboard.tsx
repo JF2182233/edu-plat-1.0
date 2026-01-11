@@ -86,11 +86,13 @@ const Dashboard = () => {
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/app" className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
-              <BookOpen className="h-4 w-4 text-primary-foreground" />
-            </div>
-            <span className="font-display text-lg font-bold text-foreground">Onboard</span>
+          <Link to="/app" className="flex items-center gap-3">
+            <img
+              src="/singelportalen-logo.svg"
+              alt="Singelportalen logo"
+              className="h-9 w-auto"
+            />
+            <span className="font-display text-lg font-bold text-foreground">Onboarding</span>
           </Link>
           
           <div className="flex items-center gap-3">
