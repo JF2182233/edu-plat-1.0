@@ -1,0 +1,7 @@
+<svg width="166" height="135" viewBox="0 0 166 135" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect x="10" y="8" width="70" height="50" rx="10" fill="#F26B86"/>
+  <rect x="70" y="12" width="70" height="50" rx="10" fill="#7FC9D6"/>
+  <rect x="35" y="28" width="70" height="50" rx="10" fill="#F7A0B2"/>
+  <path d="M70 68C61 61 46 51 46 40C46 33 51 28 58 28C63 28 67 31 70 35C73 31 77 28 82 28C89 28 94 33 94 40C94 51 79 61 70 68Z" fill="white"/>
+  <text x="0" y="120" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="24" font-weight="700" fill="#F26B86">Singelportalen</text>
+</svg>

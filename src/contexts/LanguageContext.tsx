@@ -32,8 +32,8 @@ const translations: Record<Language, Record<string, string>> = {
     'landing.trackProgressDesc': 'Följ dina framsteg och fortsätt precis där du slutade.',
     'landing.readyToStart': 'Redo att Börja Din Resa?',
     'landing.joinThousands': 'Gå med tusentals lärande som redan bemästrar nya färdigheter med vår plattform.',
-    'landing.createFreeAccount': 'Skapa Gratis Konto',
-    'landing.footer': 'Onboard. Byggt med omsorg för lärande överallt.',
+    'landing.createFreeAccount': 'Skapa konto',
+    'landing.footer': 'SP Onboarding. Byggd med omsorg.',
     
     // Auth
     'auth.backToHome': 'Tillbaka till startsidan',
@@ -196,8 +196,8 @@ const translations: Record<Language, Record<string, string>> = {
     'landing.trackProgressDesc': 'Monitor your achievements and pick up right where you left off.',
     'landing.readyToStart': 'Ready to Start Your Journey?',
     'landing.joinThousands': 'Join thousands of learners who are already mastering new skills with our platform.',
-    'landing.createFreeAccount': 'Create Free Account',
-    'landing.footer': 'Onboard. Built with care for learners everywhere.',
+    'landing.createFreeAccount': 'Create account',
+    'landing.footer': 'Onboarding. Built with care.',
     
     // Auth
     'auth.backToHome': 'Back to home',
