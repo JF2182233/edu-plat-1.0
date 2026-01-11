@@ -16,11 +16,13 @@ const Landing = () => {
         <div className="absolute bottom-0 left-0 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
         
         <nav className="relative z-10 container mx-auto px-6 py-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <BookOpen className="h-5 w-5 text-primary-foreground" />
-            </div>
-            <span className="font-display text-xl font-bold text-foreground">Onboard</span>
+          <div className="flex items-center gap-3">
+            <img
+              src="/singelportalen-logo.svg"
+              alt="Singelportalen logo"
+              className="h-10 w-auto"
+            />
+            <span className="font-display text-xl font-bold text-foreground">Onboarding</span>
           </div>
           <div className="flex items-center gap-3">
             <LanguageToggle />
