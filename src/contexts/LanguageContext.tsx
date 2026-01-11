@@ -33,7 +33,7 @@ const translations: Record<Language, Record<string, string>> = {
     'landing.readyToStart': 'Redo att Börja Din Resa?',
     'landing.joinThousands': 'Gå med tusentals lärande som redan bemästrar nya färdigheter med vår plattform.',
     'landing.createFreeAccount': 'Skapa konto',
-    'landing.footer': 'Onboarding. Byggt med omsorg för lärande överallt.',
+    'landing.footer': 'SP Onboarding. Byggd med omsorg.',
     
     // Auth
     'auth.backToHome': 'Tillbaka till startsidan',
@@ -197,7 +197,7 @@ const translations: Record<Language, Record<string, string>> = {
     'landing.readyToStart': 'Ready to Start Your Journey?',
     'landing.joinThousands': 'Join thousands of learners who are already mastering new skills with our platform.',
     'landing.createFreeAccount': 'Create account',
-    'landing.footer': 'Onboarding. Built with care for learners everywhere.',
+    'landing.footer': 'Onboarding. Built with care.',
     
     // Auth
     'auth.backToHome': 'Back to home',
