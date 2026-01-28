@@ -221,12 +221,12 @@ const AdminModuleEdit = () => {
               <p className="text-sm text-muted-foreground">{t('admin.moduleVisibilityDesc')}</p>
             </div>
             <div className="flex items-center gap-3">
-              <Switch id="restrict-access" checked={restrictAccess} onCheckedChange={handleRestrictAccessChange} />
-              <Label htmlFor="restrict-access" className="cursor-pointer">{t('admin.restrictToUsers')}</Label>
+              <Switch id="restrict-access" checked={restrictAccess} onCheckedChange={handleRestrictAccessChange} className="data-[state=unchecked]:bg-muted/70 data-[state=checked]:bg-primary shadow-sm" />
+              <Label htmlFor="restrict-access" className="cursor-pointer text-sm font-medium text-foreground">{t('admin.restrictToUsers')}</Label>
             </div>
           </div>
-          <ScrollArea className="h-52 rounded-xl border border-border/60">
-            <div className="divide-y divide-border/60">
+          <ScrollArea className="h-52 rounded-xl border border-border/70 bg-muted/20">
+            <div className="divide-y divide-border/70">
               {profiles.length === 0 ? (
                 <div className="p-4 text-sm text-muted-foreground">{t('admin.noUsersYet')}</div>
               ) : (
@@ -235,10 +235,10 @@ const AdminModuleEdit = () => {
                   return (
                     <label
                       key={profile.id}
-                      className="flex items-center justify-between gap-4 p-4 cursor-pointer"
+                      className="flex items-center justify-between gap-4 p-4 cursor-pointer bg-background/70 hover:bg-muted/40 transition-colors"
                     >
                       <div className="flex flex-col">
-                        <span className="text-sm font-medium">{label}</span>
+                        <span className="text-sm font-medium text-foreground">{label}</span>
                         <span className="text-xs text-muted-foreground">{profile.email}</span>
                       </div>
                       <Checkbox
@@ -249,6 +249,7 @@ const AdminModuleEdit = () => {
                           }
                           toggleAccessUser(profile.id);
                         }}
+                        className="h-5 w-5 border-muted-foreground/40 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                       />
                     </label>
                   );
