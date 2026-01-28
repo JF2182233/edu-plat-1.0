@@ -109,6 +109,18 @@ const AdminModuleEdit = () => {
     fetch();
   }, [id]);
 
+  const getErrorMessage = (error: unknown) => {
+    if (!error) return t('toast.error');
+    if (typeof error === 'string') return error;
+    if (error instanceof Error && error.message) return error.message;
+    if (typeof error === 'object') {
+      const record = error as { message?: string; details?: string; code?: string };
+      const parts = [record.message, record.details, record.code].filter(Boolean);
+      if (parts.length > 0) return parts.join(' ');
+    }
+    return t('toast.error');
+  };
+
   const handleSave = async () => {
     if (!module || !id) return;
     setSaving(true);
@@ -181,7 +193,8 @@ const AdminModuleEdit = () => {
       setInitialAccessUserIds(new Set(desiredIds));
       toast({ title: t('admin.savedSuccessfully') });
     } catch (error) {
-      const message = error instanceof Error ? error.message : t('toast.error');
+      const message = getErrorMessage(error);
+      console.error('Failed to save module details', error);
       toast({ variant: 'destructive', title: t('toast.error'), description: message });
     } finally {
       setSaving(false);
