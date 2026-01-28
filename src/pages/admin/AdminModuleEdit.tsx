@@ -167,7 +167,7 @@ const AdminModuleEdit = () => {
   if (!module) return <div className="min-h-screen flex items-center justify-center">{t('module.moduleNotFound')}</div>;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-muted/20">
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
           <Link to="/admin/modules" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground">
@@ -183,7 +183,7 @@ const AdminModuleEdit = () => {
       </header>
 
       <main className="container mx-auto px-6 py-8 max-w-3xl space-y-8">
-        <div className="glass-card rounded-2xl p-6 space-y-4 border border-border/80 bg-gradient-to-br from-white via-white to-muted/40 shadow-lg ring-1 ring-border/60">
+        <div className="glass-card rounded-2xl p-6 space-y-4 border border-muted/40 bg-white shadow-xl ring-1 ring-border/60">
           <h2 className="font-display text-xl font-semibold">{t('admin.moduleDetails')}</h2>
           
           <Tabs defaultValue="sv" className="w-full">
@@ -214,7 +214,7 @@ const AdminModuleEdit = () => {
           </div>
         </div>
 
-        <div className="glass-card rounded-2xl p-6 space-y-4 border border-primary/30 bg-gradient-to-br from-white via-white to-primary/10 shadow-xl ring-1 ring-primary/20">
+        <div className="glass-card rounded-2xl p-6 space-y-4 border border-primary/30 bg-white shadow-xl ring-1 ring-primary/20">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="font-display text-xl font-semibold">{t('admin.moduleVisibility')}</h2>
@@ -225,7 +225,7 @@ const AdminModuleEdit = () => {
               <Label htmlFor="restrict-access" className="cursor-pointer text-sm font-semibold text-foreground">{t('admin.restrictToUsers')}</Label>
             </div>
           </div>
-          <ScrollArea className="h-52 rounded-xl border border-primary/20 bg-white shadow-inner">
+          <ScrollArea className="h-52 rounded-xl border border-primary/20 bg-muted/10 shadow-inner">
             <div className="divide-y divide-border/70">
               {profiles.length === 0 ? (
                 <div className="p-4 text-sm text-muted-foreground">{t('admin.noUsersYet')}</div>
@@ -235,7 +235,7 @@ const AdminModuleEdit = () => {
                   return (
                     <label
                       key={profile.id}
-                      className="flex items-center justify-between gap-4 p-4 cursor-pointer bg-white hover:bg-primary/10 transition-colors border-l-4 border-l-transparent hover:border-l-primary/60"
+                      className="flex items-center justify-between gap-4 p-4 cursor-pointer bg-white/90 hover:bg-primary/10 transition-colors border-l-4 border-l-transparent hover:border-l-primary/60 ring-1 ring-muted/20"
                     >
                       <div className="flex flex-col">
                         <span className="text-sm font-medium text-foreground">{label}</span>
@@ -259,7 +259,7 @@ const AdminModuleEdit = () => {
           </ScrollArea>
         </div>
 
-        <div className="glass-card rounded-2xl p-6 space-y-4 border border-border/80 bg-gradient-to-br from-white via-white to-muted/40 shadow-lg ring-1 ring-border/60">
+        <div className="glass-card rounded-2xl p-6 space-y-4 border border-muted/40 bg-white shadow-xl ring-1 ring-border/60">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-xl font-semibold">{t('admin.quizQuestions')}</h2>
             <Button variant="outline" size="sm" onClick={addQuestion}><Plus className="h-4 w-4 mr-2" />{t('admin.add')}</Button>
