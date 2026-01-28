@@ -113,66 +113,79 @@ const AdminModuleEdit = () => {
     if (!module || !id) return;
     setSaving(true);
 
-    await supabase.from('modules').update({
-      title_sv: module.title_sv,
-      title_en: module.title_en,
-      description_sv: module.description_sv,
-      description_en: module.description_en,
-      read_content_sv: module.read_content_sv,
-      read_content_en: module.read_content_en,
-      is_published: module.is_published,
-    }).eq('id', id);
+    try {
+      const { error: moduleError } = await supabase.from('modules').update({
+        title_sv: module.title_sv,
+        title_en: module.title_en,
+        description_sv: module.description_sv,
+        description_en: module.description_en,
+        read_content_sv: module.read_content_sv,
+        read_content_en: module.read_content_en,
+        is_published: module.is_published,
+      }).eq('id', id);
 
-    const topicsToSave = topics.map((topic, index) => ({
-      ...topic,
-      module_id: id,
-      sort_order: index,
-    }));
+      if (moduleError) throw moduleError;
 
-    if (topicsToSave.length > 0) {
-      await supabase.from('module_topics').upsert(topicsToSave);
-    }
+      const topicsToSave = topics.map((topic, index) => ({
+        ...topic,
+        module_id: id,
+        sort_order: index,
+      }));
 
-    if (removedTopicIds.size > 0) {
-      await supabase.from('module_topics').delete().in('id', [...removedTopicIds]);
-      setRemovedTopicIds(new Set());
-    }
-
-    for (const topic of topicsToSave) {
-      const questions = topicQuestions[topic.id] || [];
-      for (const [index, q] of questions.entries()) {
-        await supabase.from('questions').upsert({
-          id: q.id,
-          module_id: id,
-          topic_id: topic.id,
-          question_text: q.question_text,
-          options: JSON.stringify(q.options),
-          correct_index: q.correct_index,
-          explanation: q.explanation,
-          sort_order: index,
-        });
+      if (topicsToSave.length > 0) {
+        const { error: topicError } = await supabase.from('module_topics').upsert(topicsToSave);
+        if (topicError) throw topicError;
       }
-    }
 
-    const desiredIds = restrictAccess ? accessUserIds : new Set<string>();
-    const idsToAdd = [...desiredIds].filter((userId) => !initialAccessUserIds.has(userId));
-    const idsToRemove = [...initialAccessUserIds].filter((userId) => !desiredIds.has(userId));
-
-    if (!restrictAccess) {
-      await supabase.from('module_access').delete().eq('module_id', id);
-    } else {
-      if (idsToRemove.length > 0) {
-        await supabase.from('module_access').delete().eq('module_id', id).in('user_id', idsToRemove);
+      if (removedTopicIds.size > 0) {
+        const { error: removeTopicError } = await supabase.from('module_topics').delete().in('id', [...removedTopicIds]);
+        if (removeTopicError) throw removeTopicError;
+        setRemovedTopicIds(new Set());
       }
-      if (idsToAdd.length > 0) {
-        await supabase.from('module_access').insert(idsToAdd.map((userId) => ({ module_id: id, user_id: userId })));
+
+      for (const topic of topicsToSave) {
+        const questions = topicQuestions[topic.id] || [];
+        for (const [index, q] of questions.entries()) {
+          const { error: questionError } = await supabase.from('questions').upsert({
+            id: q.id,
+            module_id: id,
+            topic_id: topic.id,
+            question_text: q.question_text,
+            options: JSON.stringify(q.options),
+            correct_index: q.correct_index,
+            explanation: q.explanation,
+            sort_order: index,
+          });
+          if (questionError) throw questionError;
+        }
       }
+
+      const desiredIds = restrictAccess ? accessUserIds : new Set<string>();
+      const idsToAdd = [...desiredIds].filter((userId) => !initialAccessUserIds.has(userId));
+      const idsToRemove = [...initialAccessUserIds].filter((userId) => !desiredIds.has(userId));
+
+      if (!restrictAccess) {
+        const { error: accessDeleteError } = await supabase.from('module_access').delete().eq('module_id', id);
+        if (accessDeleteError) throw accessDeleteError;
+      } else {
+        if (idsToRemove.length > 0) {
+          const { error: removeAccessError } = await supabase.from('module_access').delete().eq('module_id', id).in('user_id', idsToRemove);
+          if (removeAccessError) throw removeAccessError;
+        }
+        if (idsToAdd.length > 0) {
+          const { error: addAccessError } = await supabase.from('module_access').insert(idsToAdd.map((userId) => ({ module_id: id, user_id: userId })));
+          if (addAccessError) throw addAccessError;
+        }
+      }
+
+      setInitialAccessUserIds(new Set(desiredIds));
+      toast({ title: t('admin.savedSuccessfully') });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : t('toast.error');
+      toast({ variant: 'destructive', title: t('toast.error'), description: message });
+    } finally {
+      setSaving(false);
     }
-
-    setInitialAccessUserIds(new Set(desiredIds));
-
-    toast({ title: t('admin.savedSuccessfully') });
-    setSaving(false);
   };
 
   const addTopic = () => {
