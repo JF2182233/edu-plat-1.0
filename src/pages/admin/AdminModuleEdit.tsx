@@ -183,7 +183,52 @@ const AdminModuleEdit = () => {
       </header>
 
       <main className="container mx-auto px-6 py-8 max-w-3xl space-y-8">
-        <div className="glass-card rounded-2xl p-6 space-y-4 border border-sky-200/80 bg-gradient-to-br from-white via-white to-sky-100/70 shadow-2xl ring-1 ring-sky-200/70 border-t-4 border-t-sky-400">
+        <div className="glass-card rounded-2xl p-6 space-y-4 border border-amber-200/80 bg-gradient-to-br from-white via-amber-50 to-amber-100/70 shadow-2xl ring-1 ring-amber-200/70 border-t-4 border-t-amber-400">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="font-display text-xl font-semibold">{t('admin.moduleVisibility')}</h2>
+              <p className="text-sm text-muted-foreground">{t('admin.moduleVisibilityDesc')}</p>
+            </div>
+            <div className="flex items-center gap-3 rounded-full border border-amber-300/70 bg-amber-100/80 px-4 py-2 shadow-md">
+              <Switch id="restrict-access" checked={restrictAccess} onCheckedChange={handleRestrictAccessChange} className="scale-125 data-[state=unchecked]:bg-muted/70 data-[state=checked]:bg-amber-500 data-[state=checked]:shadow-lg" />
+              <Label htmlFor="restrict-access" className="cursor-pointer text-sm font-semibold text-foreground">{t('admin.restrictToUsers')}</Label>
+            </div>
+          </div>
+          <ScrollArea className="h-52 rounded-xl border border-amber-200/70 bg-amber-50/70 shadow-inner">
+            {profiles.length === 0 ? (
+              <div className="p-4 text-sm text-muted-foreground">{t('admin.noUsersYet')}</div>
+            ) : (
+              <div className="space-y-2 p-2">
+                {profiles.map(profile => {
+                  const label = profile.display_name || profile.email || t('admin.unnamedUser');
+                  return (
+                    <label
+                      key={profile.id}
+                      className="flex items-center justify-between gap-4 rounded-xl border border-amber-200/70 bg-white p-4 shadow-sm transition-colors hover:border-amber-300 hover:bg-amber-50"
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium text-foreground">{label}</span>
+                        <span className="text-xs text-muted-foreground">{profile.email}</span>
+                      </div>
+                      <Checkbox
+                        checked={accessUserIds.has(profile.id)}
+                        onCheckedChange={() => {
+                          if (!restrictAccess) {
+                            setRestrictAccess(true);
+                          }
+                          toggleAccessUser(profile.id);
+                        }}
+                        className="h-5 w-5 border-muted-foreground/60 data-[state=checked]:bg-amber-500 data-[state=checked]:border-amber-500 data-[state=checked]:shadow-md"
+                      />
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+          </ScrollArea>
+        </div>
+
+        <div className="glass-card rounded-2xl p-6 space-y-4 border border-sky-200/80 bg-gradient-to-br from-white via-sky-50 to-sky-100/70 shadow-2xl ring-1 ring-sky-200/70 border-t-4 border-t-sky-400">
           <h2 className="font-display text-xl font-semibold">{t('admin.moduleDetails')}</h2>
           
           <Tabs defaultValue="sv" className="w-full">
@@ -214,52 +259,7 @@ const AdminModuleEdit = () => {
           </div>
         </div>
 
-        <div className="glass-card rounded-2xl p-6 space-y-4 border border-primary/30 bg-gradient-to-br from-white via-white to-blue-100/70 shadow-2xl ring-1 ring-primary/25 border-t-4 border-t-primary/70">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h2 className="font-display text-xl font-semibold">{t('admin.moduleVisibility')}</h2>
-              <p className="text-sm text-muted-foreground">{t('admin.moduleVisibilityDesc')}</p>
-            </div>
-            <div className="flex items-center gap-3 rounded-full border border-primary/50 bg-primary/25 px-4 py-2 shadow-md">
-              <Switch id="restrict-access" checked={restrictAccess} onCheckedChange={handleRestrictAccessChange} className="scale-125 data-[state=unchecked]:bg-muted/70 data-[state=checked]:bg-primary data-[state=checked]:shadow-lg" />
-              <Label htmlFor="restrict-access" className="cursor-pointer text-sm font-semibold text-foreground">{t('admin.restrictToUsers')}</Label>
-            </div>
-          </div>
-          <ScrollArea className="h-52 rounded-xl border border-slate-200 bg-slate-100/80 shadow-inner">
-            {profiles.length === 0 ? (
-              <div className="p-4 text-sm text-muted-foreground">{t('admin.noUsersYet')}</div>
-            ) : (
-              <div className="space-y-2 p-2">
-                {profiles.map(profile => {
-                  const label = profile.display_name || profile.email || t('admin.unnamedUser');
-                  return (
-                    <label
-                      key={profile.id}
-                      className="flex items-center justify-between gap-4 rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm transition-colors hover:border-primary/60 hover:bg-sky-50"
-                    >
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-foreground">{label}</span>
-                        <span className="text-xs text-muted-foreground">{profile.email}</span>
-                      </div>
-                      <Checkbox
-                        checked={accessUserIds.has(profile.id)}
-                        onCheckedChange={() => {
-                          if (!restrictAccess) {
-                            setRestrictAccess(true);
-                          }
-                          toggleAccessUser(profile.id);
-                        }}
-                        className="h-5 w-5 border-muted-foreground/60 data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:shadow-md"
-                      />
-                    </label>
-                  );
-                })}
-              </div>
-            )}
-          </ScrollArea>
-        </div>
-
-        <div className="glass-card rounded-2xl p-6 space-y-4 border border-emerald-200/80 bg-gradient-to-br from-white via-white to-emerald-50/70 shadow-2xl ring-1 ring-emerald-200/70 border-t-4 border-t-emerald-400">
+        <div className="glass-card rounded-2xl p-6 space-y-4 border border-emerald-200/80 bg-gradient-to-br from-white via-emerald-50 to-emerald-100/70 shadow-2xl ring-1 ring-emerald-200/70 border-t-4 border-t-emerald-400">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-xl font-semibold">{t('admin.quizQuestions')}</h2>
             <Button variant="outline" size="sm" onClick={addQuestion}><Plus className="h-4 w-4 mr-2" />{t('admin.add')}</Button>
