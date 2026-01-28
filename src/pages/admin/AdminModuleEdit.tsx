@@ -156,6 +156,13 @@ const AdminModuleEdit = () => {
     setAccessUserIds(next);
   };
 
+  const handleRestrictAccessChange = (checked: boolean) => {
+    setRestrictAccess(checked);
+    if (!checked) {
+      setAccessUserIds(new Set());
+    }
+  };
+
   if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
   if (!module) return <div className="min-h-screen flex items-center justify-center">{t('module.moduleNotFound')}</div>;
 
@@ -214,8 +221,8 @@ const AdminModuleEdit = () => {
               <p className="text-sm text-muted-foreground">{t('admin.moduleVisibilityDesc')}</p>
             </div>
             <div className="flex items-center gap-3">
-              <Switch checked={restrictAccess} onCheckedChange={setRestrictAccess} />
-              <Label>{t('admin.restrictToUsers')}</Label>
+              <Switch id="restrict-access" checked={restrictAccess} onCheckedChange={handleRestrictAccessChange} />
+              <Label htmlFor="restrict-access" className="cursor-pointer">{t('admin.restrictToUsers')}</Label>
             </div>
           </div>
           <ScrollArea className="h-52 rounded-xl border border-border/60">
@@ -226,15 +233,22 @@ const AdminModuleEdit = () => {
                 profiles.map(profile => {
                   const label = profile.display_name || profile.email || t('admin.unnamedUser');
                   return (
-                    <label key={profile.id} className="flex items-center justify-between gap-4 p-4">
+                    <label
+                      key={profile.id}
+                      className="flex items-center justify-between gap-4 p-4 cursor-pointer"
+                    >
                       <div className="flex flex-col">
                         <span className="text-sm font-medium">{label}</span>
                         <span className="text-xs text-muted-foreground">{profile.email}</span>
                       </div>
                       <Checkbox
                         checked={accessUserIds.has(profile.id)}
-                        onCheckedChange={() => toggleAccessUser(profile.id)}
-                        disabled={!restrictAccess}
+                        onCheckedChange={() => {
+                          if (!restrictAccess) {
+                            setRestrictAccess(true);
+                          }
+                          toggleAccessUser(profile.id);
+                        }}
                       />
                     </label>
                   );
