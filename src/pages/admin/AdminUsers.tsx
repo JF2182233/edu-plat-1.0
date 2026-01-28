@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Loader2 } from 'lucide-react';
@@ -6,7 +6,23 @@ import { Progress } from '@/components/ui/progress';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-interface UserWithProgress { id: string; email: string; display_name: string | null; progress: { module_title: string; percent: number; completed: boolean; }[]; }
+interface UserWithProgress {
+  id: string;
+  email: string;
+  display_name: string | null;
+  progress: { module_title: string; percent: number; completed: boolean }[];
+}
+
+interface ModuleSummary {
+  id: string;
+  title_sv: string;
+  title_en: string;
+}
+
+interface ModuleTopicSummary {
+  id: string;
+  module_id: string;
+}
 
 const AdminUsers = () => {
   const { t, language } = useLanguage();
@@ -15,33 +31,57 @@ const AdminUsers = () => {
 
   const getLocalizedContent = (sv: string, en: string) => language === 'en' ? en : sv;
 
+  const moduleTitle = useMemo(() => (module: ModuleSummary) => getLocalizedContent(module.title_sv, module.title_en), [language]);
+
   useEffect(() => {
     const fetch = async () => {
-      const [profilesRes, modulesRes, progressRes] = await Promise.all([
+      const [profilesRes, modulesRes, topicsRes, progressRes] = await Promise.all([
         supabase.from('profiles').select('id, email, display_name'),
         supabase.from('modules').select('id, title_sv, title_en'),
-        supabase.from('user_progress').select('*'),
+        supabase.from('module_topics').select('id, module_id'),
+        supabase.from('topic_progress').select('user_id, topic_id, completed_at'),
       ]);
 
-      if (profilesRes.data && modulesRes.data && progressRes.data) {
-        const usersData = profilesRes.data.map(profile => {
-          const userProgress = progressRes.data.filter(p => p.user_id === profile.id);
-          const progress = modulesRes.data.map(m => {
-            const p = userProgress.find(up => up.module_id === m.id);
-            let steps = 0;
-            if (p?.step_read_done) steps++;
-            if (p?.step_watch_done) steps++;
-            if (p?.completed_at) steps++;
-            return { module_title: getLocalizedContent(m.title_sv, m.title_en), percent: Math.round((steps / 3) * 100), completed: !!p?.completed_at };
+      if (profilesRes.data && modulesRes.data && topicsRes.data && progressRes.data) {
+        const topicsByModule = topicsRes.data.reduce<Record<string, ModuleTopicSummary[]>>((acc, topic) => {
+          acc[topic.module_id] = acc[topic.module_id] || [];
+          acc[topic.module_id].push(topic);
+          return acc;
+        }, {});
+
+        const progressByUser = progressRes.data.reduce<Record<string, Set<string>>>((acc, entry) => {
+          if (!entry.completed_at) return acc;
+          acc[entry.user_id] = acc[entry.user_id] || new Set();
+          acc[entry.user_id].add(entry.topic_id);
+          return acc;
+        }, {});
+
+        const usersData = profilesRes.data.map((profile) => {
+          const completedTopics = progressByUser[profile.id] || new Set<string>();
+          const progress = modulesRes.data.map((module) => {
+            const moduleTopics = topicsByModule[module.id] || [];
+            if (moduleTopics.length === 0) {
+              return { module_title: moduleTitle(module), percent: 0, completed: false };
+            }
+
+            const completedCount = moduleTopics.filter((topic) => completedTopics.has(topic.id)).length;
+            const percent = Math.round((completedCount / moduleTopics.length) * 100);
+            return {
+              module_title: moduleTitle(module),
+              percent,
+              completed: completedCount === moduleTopics.length,
+            };
           });
+
           return { id: profile.id, email: profile.email, display_name: profile.display_name, progress };
         });
+
         setUsers(usersData);
       }
       setLoading(false);
     };
     fetch();
-  }, [language]);
+  }, [language, moduleTitle]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -56,7 +96,7 @@ const AdminUsers = () => {
 
       <main className="container mx-auto px-6 py-12">
         <h1 className="font-display text-3xl font-bold mb-8">{t('admin.users')}</h1>
-        
+
         {loading ? (
           <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
         ) : users.length === 0 ? (

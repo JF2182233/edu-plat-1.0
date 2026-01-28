@@ -59,6 +59,59 @@ export type Database = {
         }
         Relationships: []
       }
+      module_topics: {
+        Row: {
+          created_at: string
+          description_en: string
+          description_sv: string
+          id: string
+          module_id: string
+          read_content_en: string
+          read_content_sv: string
+          sort_order: number
+          title_en: string
+          title_sv: string
+          updated_at: string
+          video_url: string
+        }
+        Insert: {
+          created_at?: string
+          description_en: string
+          description_sv: string
+          id?: string
+          module_id: string
+          read_content_en: string
+          read_content_sv: string
+          sort_order?: number
+          title_en: string
+          title_sv: string
+          updated_at?: string
+          video_url: string
+        }
+        Update: {
+          created_at?: string
+          description_en?: string
+          description_sv?: string
+          id?: string
+          module_id?: string
+          read_content_en?: string
+          read_content_sv?: string
+          sort_order?: number
+          title_en?: string
+          title_sv?: string
+          updated_at?: string
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_topics_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       module_access: {
         Row: {
           created_at: string
@@ -115,6 +168,7 @@ export type Database = {
           explanation: string | null
           id: string
           module_id: string
+          topic_id: string
           options: Json
           question_text: string
           sort_order: number
@@ -124,6 +178,7 @@ export type Database = {
           explanation?: string | null
           id?: string
           module_id: string
+          topic_id: string
           options: Json
           question_text: string
           sort_order?: number
@@ -133,6 +188,7 @@ export type Database = {
           explanation?: string | null
           id?: string
           module_id?: string
+          topic_id?: string
           options?: Json
           question_text?: string
           sort_order?: number
@@ -143,6 +199,13 @@ export type Database = {
             columns: ["module_id"]
             isOneToOne: false
             referencedRelation: "modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "questions_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "module_topics"
             referencedColumns: ["id"]
           },
         ]
@@ -194,6 +257,53 @@ export type Database = {
           },
         ]
       }
+      topic_progress: {
+        Row: {
+          best_score: number
+          completed_at: string | null
+          id: string
+          latest_score: number
+          quiz_attempts: number
+          step_read_done: boolean
+          step_watch_done: boolean
+          topic_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          best_score?: number
+          completed_at?: string | null
+          id?: string
+          latest_score?: number
+          quiz_attempts?: number
+          step_read_done?: boolean
+          step_watch_done?: boolean
+          topic_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          best_score?: number
+          completed_at?: string | null
+          id?: string
+          latest_score?: number
+          quiz_attempts?: number
+          step_read_done?: boolean
+          step_watch_done?: boolean
+          topic_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "topic_progress_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "module_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -218,7 +328,7 @@ export type Database = {
     }
     Functions: {
       get_quiz_questions: {
-        Args: { p_module_id: string }
+        Args: { p_topic_id: string }
         Returns: {
           id: string
           options: Json
@@ -227,7 +337,7 @@ export type Database = {
         }[]
       }
       get_quiz_results: {
-        Args: { p_module_id: string }
+        Args: { p_topic_id: string }
         Returns: {
           correct_index: number
           explanation: string
@@ -249,7 +359,7 @@ export type Database = {
         Returns: boolean
       }
       submit_quiz_answers: {
-        Args: { p_answers: Json; p_module_id: string }
+        Args: { p_answers: Json; p_topic_id: string }
         Returns: Json
       }
     }
