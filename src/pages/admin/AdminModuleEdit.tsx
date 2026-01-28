@@ -183,7 +183,7 @@ const AdminModuleEdit = () => {
       </header>
 
       <main className="container mx-auto px-6 py-8 max-w-3xl space-y-8">
-        <div className="glass-card rounded-2xl p-6 space-y-4">
+        <div className="glass-card rounded-2xl p-6 space-y-4 border border-border/80 bg-gradient-to-br from-white via-white to-muted/40 shadow-lg">
           <h2 className="font-display text-xl font-semibold">{t('admin.moduleDetails')}</h2>
           
           <Tabs defaultValue="sv" className="w-full">
@@ -214,19 +214,19 @@ const AdminModuleEdit = () => {
           </div>
         </div>
 
-        <div className="glass-card rounded-2xl p-6 space-y-4">
+        <div className="glass-card rounded-2xl p-6 space-y-4 border border-primary/20 bg-gradient-to-br from-white via-white to-primary/5 shadow-xl">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="font-display text-xl font-semibold">{t('admin.moduleVisibility')}</h2>
               <p className="text-sm text-muted-foreground">{t('admin.moduleVisibilityDesc')}</p>
             </div>
-            <div className="flex items-center gap-3">
-              <Switch id="restrict-access" checked={restrictAccess} onCheckedChange={handleRestrictAccessChange} className="data-[state=unchecked]:bg-muted/70 data-[state=checked]:bg-primary shadow-sm" />
-              <Label htmlFor="restrict-access" className="cursor-pointer text-sm font-medium text-foreground">{t('admin.restrictToUsers')}</Label>
+            <div className="flex items-center gap-3 rounded-full border border-primary/20 bg-white/80 px-3 py-2 shadow-sm">
+              <Switch id="restrict-access" checked={restrictAccess} onCheckedChange={handleRestrictAccessChange} className="scale-110 data-[state=unchecked]:bg-muted/80 data-[state=checked]:bg-primary data-[state=checked]:shadow-lg" />
+              <Label htmlFor="restrict-access" className="cursor-pointer text-sm font-semibold text-foreground">{t('admin.restrictToUsers')}</Label>
             </div>
           </div>
-          <ScrollArea className="h-52 rounded-xl border border-border/70 bg-muted/20">
-            <div className="divide-y divide-border/70">
+          <ScrollArea className="h-52 rounded-xl border border-border/80 bg-white">
+            <div className="divide-y divide-border/80">
               {profiles.length === 0 ? (
                 <div className="p-4 text-sm text-muted-foreground">{t('admin.noUsersYet')}</div>
               ) : (
@@ -235,7 +235,7 @@ const AdminModuleEdit = () => {
                   return (
                     <label
                       key={profile.id}
-                      className="flex items-center justify-between gap-4 p-4 cursor-pointer bg-background/70 hover:bg-muted/40 transition-colors"
+                      className="flex items-center justify-between gap-4 p-4 cursor-pointer bg-white hover:bg-primary/5 transition-colors"
                     >
                       <div className="flex flex-col">
                         <span className="text-sm font-medium text-foreground">{label}</span>
@@ -249,7 +249,7 @@ const AdminModuleEdit = () => {
                           }
                           toggleAccessUser(profile.id);
                         }}
-                        className="h-5 w-5 border-muted-foreground/40 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                        className="h-5 w-5 border-muted-foreground/60 data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:shadow-md"
                       />
                     </label>
                   );
@@ -259,7 +259,7 @@ const AdminModuleEdit = () => {
           </ScrollArea>
         </div>
 
-        <div className="glass-card rounded-2xl p-6 space-y-4">
+        <div className="glass-card rounded-2xl p-6 space-y-4 border border-border/80 bg-gradient-to-br from-white via-white to-muted/40 shadow-lg">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-xl font-semibold">{t('admin.quizQuestions')}</h2>
             <Button variant="outline" size="sm" onClick={addQuestion}><Plus className="h-4 w-4 mr-2" />{t('admin.add')}</Button>
