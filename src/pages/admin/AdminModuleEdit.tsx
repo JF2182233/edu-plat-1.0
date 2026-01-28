@@ -228,7 +228,7 @@ const AdminModuleEdit = () => {
           </ScrollArea>
         </div>
 
-        <div className="glass-card rounded-2xl p-6 space-y-4 border border-sky-200/80 bg-gradient-to-br from-white via-sky-50 to-sky-100/70 shadow-2xl ring-1 ring-sky-200/70 border-t-4 border-t-sky-400">
+        <div className="glass-card rounded-2xl p-6 space-y-4 border border-sky-300/80 bg-gradient-to-br from-white via-sky-50 to-sky-100/80 shadow-2xl ring-2 ring-sky-200/80 border-t-4 border-t-sky-500">
           <h2 className="font-display text-xl font-semibold">{t('admin.moduleDetails')}</h2>
           
           <Tabs defaultValue="sv" className="w-full">
@@ -259,7 +259,7 @@ const AdminModuleEdit = () => {
           </div>
         </div>
 
-        <div className="glass-card rounded-2xl p-6 space-y-4 border border-emerald-200/80 bg-gradient-to-br from-white via-emerald-50 to-emerald-100/70 shadow-2xl ring-1 ring-emerald-200/70 border-t-4 border-t-emerald-400">
+        <div className="glass-card rounded-2xl p-6 space-y-4 border border-emerald-300/80 bg-gradient-to-br from-white via-emerald-50 to-emerald-100/80 shadow-2xl ring-2 ring-emerald-200/80 border-t-4 border-t-emerald-500">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-xl font-semibold">{t('admin.quizQuestions')}</h2>
             <Button variant="outline" size="sm" onClick={addQuestion}><Plus className="h-4 w-4 mr-2" />{t('admin.add')}</Button>
