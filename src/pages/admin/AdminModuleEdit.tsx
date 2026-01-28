@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowLeft, Plus, Trash2, Save, Loader2 } from 'lucide-react';
 import { LanguageToggle } from '@/components/LanguageToggle';
@@ -33,24 +35,43 @@ interface Question {
   sort_order: number;
 }
 
+interface Profile {
+  id: string;
+  email: string;
+  display_name: string | null;
+}
+
 const AdminModuleEdit = () => {
   const { id } = useParams<{ id: string }>();
   const { t } = useLanguage();
   const { toast } = useToast();
   const [module, setModule] = useState<Module | null>(null);
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [accessUserIds, setAccessUserIds] = useState<Set<string>>(new Set());
+  const [initialAccessUserIds, setInitialAccessUserIds] = useState<Set<string>>(new Set());
+  const [restrictAccess, setRestrictAccess] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
       if (!id) return;
-      const [mRes, qRes] = await Promise.all([
+      const [mRes, qRes, profilesRes, accessRes] = await Promise.all([
         supabase.from('modules').select('*').eq('id', id).single(),
         supabase.from('questions').select('*').eq('module_id', id).order('sort_order'),
+        supabase.from('profiles').select('id, email, display_name').order('email'),
+        supabase.from('module_access').select('user_id').eq('module_id', id),
       ]);
       if (mRes.data) setModule(mRes.data);
       if (qRes.data) setQuestions(qRes.data.map(q => ({ ...q, options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options })));
+      if (profilesRes.data) setProfiles(profilesRes.data);
+      if (accessRes.data) {
+        const ids = new Set(accessRes.data.map(entry => entry.user_id));
+        setAccessUserIds(ids);
+        setInitialAccessUserIds(ids);
+        setRestrictAccess(ids.size > 0);
+      }
       setLoading(false);
     };
     fetch();
@@ -83,6 +104,23 @@ const AdminModuleEdit = () => {
       });
     }
 
+    const desiredIds = restrictAccess ? accessUserIds : new Set<string>();
+    const idsToAdd = [...desiredIds].filter(userId => !initialAccessUserIds.has(userId));
+    const idsToRemove = [...initialAccessUserIds].filter(userId => !desiredIds.has(userId));
+
+    if (!restrictAccess) {
+      await supabase.from('module_access').delete().eq('module_id', id);
+    } else {
+      if (idsToRemove.length > 0) {
+        await supabase.from('module_access').delete().eq('module_id', id).in('user_id', idsToRemove);
+      }
+      if (idsToAdd.length > 0) {
+        await supabase.from('module_access').insert(idsToAdd.map(userId => ({ module_id: id, user_id: userId })));
+      }
+    }
+
+    setInitialAccessUserIds(new Set(desiredIds));
+
     toast({ title: t('admin.savedSuccessfully') });
     setSaving(false);
   };
@@ -106,6 +144,16 @@ const AdminModuleEdit = () => {
 
   const updateQuestion = (qId: string, updates: Partial<Question>) => {
     setQuestions(questions.map(q => q.id === qId ? { ...q, ...updates } : q));
+  };
+
+  const toggleAccessUser = (userId: string) => {
+    const next = new Set(accessUserIds);
+    if (next.has(userId)) {
+      next.delete(userId);
+    } else {
+      next.add(userId);
+    }
+    setAccessUserIds(next);
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
@@ -157,6 +205,43 @@ const AdminModuleEdit = () => {
               <Label>{t('admin.published')}</Label>
             </div>
           </div>
+        </div>
+
+        <div className="glass-card rounded-2xl p-6 space-y-4">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <h2 className="font-display text-xl font-semibold">{t('admin.moduleVisibility')}</h2>
+              <p className="text-sm text-muted-foreground">{t('admin.moduleVisibilityDesc')}</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Switch checked={restrictAccess} onCheckedChange={setRestrictAccess} />
+              <Label>{t('admin.restrictToUsers')}</Label>
+            </div>
+          </div>
+          <ScrollArea className="h-52 rounded-xl border border-border/60">
+            <div className="divide-y divide-border/60">
+              {profiles.length === 0 ? (
+                <div className="p-4 text-sm text-muted-foreground">{t('admin.noUsersYet')}</div>
+              ) : (
+                profiles.map(profile => {
+                  const label = profile.display_name || profile.email || t('admin.unnamedUser');
+                  return (
+                    <label key={profile.id} className="flex items-center justify-between gap-4 p-4">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">{label}</span>
+                        <span className="text-xs text-muted-foreground">{profile.email}</span>
+                      </div>
+                      <Checkbox
+                        checked={accessUserIds.has(profile.id)}
+                        onCheckedChange={() => toggleAccessUser(profile.id)}
+                        disabled={!restrictAccess}
+                      />
+                    </label>
+                  );
+                })
+              )}
+            </div>
+          </ScrollArea>
         </div>
 
         <div className="glass-card rounded-2xl p-6 space-y-4">
