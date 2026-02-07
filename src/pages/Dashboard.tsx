@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -18,12 +18,13 @@ interface Module {
   description_en: string;
 }
 
-interface UserProgress {
+interface ModuleTopicSummary {
+  id: string;
   module_id: string;
-  step_read_done: boolean;
-  step_watch_done: boolean;
-  quiz_attempts: number;
-  best_score: number;
+}
+
+interface TopicProgress {
+  topic_id: string;
   completed_at: string | null;
   updated_at: string;
 }
@@ -32,7 +33,8 @@ const Dashboard = () => {
   const { user, isAdmin, signOut } = useAuth();
   const { t, language } = useLanguage();
   const [modules, setModules] = useState<Module[]>([]);
-  const [progress, setProgress] = useState<Record<string, UserProgress>>({});
+  const [topics, setTopics] = useState<ModuleTopicSummary[]>([]);
+  const [progress, setProgress] = useState<TopicProgress[]>([]);
   const [loading, setLoading] = useState(true);
 
   const getLocalizedContent = (sv: string, en: string) => language === 'en' ? en : sv;
@@ -41,38 +43,68 @@ const Dashboard = () => {
     const fetchData = async () => {
       if (!user) return;
 
-      const [modulesRes, progressRes] = await Promise.all([
+      const [modulesRes, topicsRes, progressRes] = await Promise.all([
         supabase.from('modules').select('id, title_sv, title_en, description_sv, description_en').eq('is_published', true).order('sort_order'),
-        supabase.from('user_progress').select('*').eq('user_id', user.id),
+        supabase.from('module_topics').select('id, module_id').order('sort_order'),
+        supabase.from('topic_progress').select('topic_id, completed_at, updated_at').eq('user_id', user.id),
       ]);
 
       if (modulesRes.data) setModules(modulesRes.data);
-      if (progressRes.data) {
-        const progressMap: Record<string, UserProgress> = {};
-        progressRes.data.forEach((p) => {
-          progressMap[p.module_id] = p;
-        });
-        setProgress(progressMap);
-      }
+      if (topicsRes.data) setTopics(topicsRes.data);
+      if (progressRes.data) setProgress(progressRes.data);
+
       setLoading(false);
     };
 
     fetchData();
   }, [user]);
 
+  const progressByModule = useMemo(() => {
+    const topicsByModule = topics.reduce<Record<string, ModuleTopicSummary[]>>((acc, topic) => {
+      acc[topic.module_id] = acc[topic.module_id] || [];
+      acc[topic.module_id].push(topic);
+      return acc;
+    }, {});
+
+    const progressByTopic = progress.reduce<Record<string, TopicProgress>>((acc, entry) => {
+      acc[entry.topic_id] = entry;
+      return acc;
+    }, {});
+
+    const moduleProgressMap = new Map<string, { total: number; completed: number; updatedAt?: string }>();
+
+    Object.entries(topicsByModule).forEach(([moduleId, moduleTopics]) => {
+      let completedCount = 0;
+      let latestUpdate = '';
+
+      moduleTopics.forEach((topic) => {
+        const entry = progressByTopic[topic.id];
+        if (entry?.completed_at) completedCount += 1;
+        if (entry?.updated_at && entry.updated_at > latestUpdate) {
+          latestUpdate = entry.updated_at;
+        }
+      });
+
+      moduleProgressMap.set(moduleId, {
+        total: moduleTopics.length,
+        completed: completedCount,
+        updatedAt: latestUpdate || undefined,
+      });
+    });
+
+    return moduleProgressMap;
+  }, [topics, progress]);
+
   const getModuleProgress = (moduleId: string) => {
-    const p = progress[moduleId];
-    if (!p) return { percent: 0, status: 'not_started' as const };
-    
-    let steps = 0;
-    if (p.step_read_done) steps++;
-    if (p.step_watch_done) steps++;
-    if (p.completed_at) steps++;
-    
-    const percent = Math.round((steps / 3) * 100);
-    const status = p.completed_at ? 'completed' : steps > 0 ? 'in_progress' : 'not_started';
-    
-    return { percent, status };
+    const entry = progressByModule.get(moduleId);
+    if (!entry || entry.total === 0) {
+      return { percent: 0, status: 'not_started' as const, updatedAt: undefined };
+    }
+
+    const percent = Math.round((entry.completed / entry.total) * 100);
+    const status = entry.completed === entry.total ? 'completed' : entry.completed > 0 ? 'in_progress' : 'not_started';
+
+    return { percent, status, updatedAt: entry.updatedAt };
   };
 
   const handleSignOut = async () => {
@@ -94,7 +126,7 @@ const Dashboard = () => {
             />
             <span className="font-display text-lg font-bold text-foreground">Onboarding</span>
           </Link>
-          
+
           <div className="flex items-center gap-3">
             <LanguageToggle />
             {isAdmin && (
@@ -154,9 +186,8 @@ const Dashboard = () => {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {modules.map((module) => {
-              const { percent, status } = getModuleProgress(module.id);
-              const userProgress = progress[module.id];
-              
+              const { percent, status, updatedAt } = getModuleProgress(module.id);
+
               return (
                 <div
                   key={module.id}
@@ -170,7 +201,7 @@ const Dashboard = () => {
                       <CheckCircle2 className="h-5 w-5 text-success flex-shrink-0" />
                     )}
                   </div>
-                  
+
                   <p className="text-muted-foreground text-sm mb-4 line-clamp-2">
                     {getLocalizedContent(module.description_sv, module.description_en)}
                   </p>
@@ -183,11 +214,11 @@ const Dashboard = () => {
                     <Progress value={percent} className="h-2" />
                   </div>
 
-                  {userProgress?.updated_at && (
+                  {updatedAt && (
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-4">
                       <Clock className="h-3.5 w-3.5" />
                       <span>
-                        {t('dashboard.lastActivity')} {formatDistanceToNow(new Date(userProgress.updated_at), { addSuffix: true, locale: dateLocale })}
+                        {t('dashboard.lastActivity')} {formatDistanceToNow(new Date(updatedAt), { addSuffix: true, locale: dateLocale })}
                       </span>
                     </div>
                   )}
